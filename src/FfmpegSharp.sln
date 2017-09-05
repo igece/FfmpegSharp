@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26730.12
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FfmpegSharp", "FfmpegSharp.csproj", "{900A3274-0A8A-4AF3-A34F-CCB27114E58F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{900A3274-0A8A-4AF3-A34F-CCB27114E58F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{900A3274-0A8A-4AF3-A34F-CCB27114E58F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{900A3274-0A8A-4AF3-A34F-CCB27114E58F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{900A3274-0A8A-4AF3-A34F-CCB27114E58F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D361A94A-FF1D-4557-A8C4-6DC00057CE01}
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		Policies = $0
+		$0.DotNetNamingPolicy = $1
+		$1.DirectoryNamespaceAssociation = PrefixedFlat
+		$0.StandardHeader = $2
+		version = 1.2.*
+	EndGlobalSection
+EndGlobal
