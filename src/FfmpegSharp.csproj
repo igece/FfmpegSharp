@@ -8,22 +8,22 @@
     <ProjectGuid>{900A3274-0A8A-4AF3-A34F-CCB27114E58F}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>SoxSharp</RootNamespace>
-    <AssemblyName>SoxSharp</AssemblyName>
+    <RootNamespace>FfmpegSharp</RootNamespace>
+    <AssemblyName>FfmpegSharp</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
-    <PackageId>SoxSharp</PackageId>
-    <PackageVersion>1.2</PackageVersion>
+    <PackageId>FfmpegSharp</PackageId>
+    <PackageVersion>0.1</PackageVersion>
     <Authors>igece.labs</Authors>
-    <PackageLicenseUrl>https://github.com/igece/SoxSharp/blob/master/LICENSE</PackageLicenseUrl>
-    <PackageProjectUrl>https://github.com/igece/SoxSharp</PackageProjectUrl>
-    <Summary>Library that serves as a wrapper to SoX - the Sound eXchange tool.</Summary>
-    <PackageTags>sox wrapper audio conversion filters</PackageTags>
-    <Title>SoxSharp</Title>
-    <Description>Library that serves as a wrapper to SoX - the Sound eXchange tool.</Description>
-    <ReleaseVersion>1.2.*</ReleaseVersion>
+    <PackageLicenseUrl>https://github.com/igece/FfmpegSharp/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/igece/FfmpegSharp</PackageProjectUrl>
+    <Summary>Library that serves as a wrapper to FFmpeg.</Summary>
+    <PackageTags>ffmpeg wrapper video audio conversion filters</PackageTags>
+    <Title>FfmpegSharp</Title>
+    <Description>Library that serves as a wrapper to Ffmpeg.</Description>
+    <ReleaseVersion>0.5.*</ReleaseVersion>
     <PackOnBuild>true</PackOnBuild>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -35,7 +35,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>..\bin\Debug\SoxSharp.XML</DocumentationFile>
+    <DocumentationFile>..\bin\Debug\FfmpegSharp.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>
@@ -46,7 +46,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>..\bin\Release\SoxSharp.xml</DocumentationFile>
+    <DocumentationFile>..\bin\Release\FfmpegSharp.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -60,9 +60,9 @@
   <ItemGroup>
     <Compile Include="Events.cs" />
     <Compile Include="MediaInfo.cs" />
-    <Compile Include="FormatOptions.cs" />
+    <Compile Include="FileOptions.cs" />
     <Compile Include="InputFile.cs" />
-    <Compile Include="OutputFormatOptions.cs" />
+    <Compile Include="OutputFile.cs" />
     <Compile Include="Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -76,6 +76,7 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Exceptions\FfmpegException.cs" />
+    <Compile Include="VideoOptions.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources.resx">

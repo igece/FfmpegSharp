@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using FfmpegSharp.Exceptions;
 
 
 namespace FfmpegSharp
@@ -6,24 +7,8 @@ namespace FfmpegSharp
   /// <summary>
   /// Input format options.
   /// </summary>
-  public class InputFile : FormatOptions
+  public class InputFile : FileOptions
   {
-    /// <summary>
-    /// Input file URL.
-    /// </summary>
-    public string Url { get; set; }
-
-    /// <summary>
-    ///Force input file format. The format is normally auto detected for input files, so this option is not needed in most cases.
-    /// </summary>
-    public string Format { get; set; }
-
-    /// <summary>
-    /// Number of times input stream shall be looped. Loop 0 means no loop, loop -1 means infinite loop.
-    /// </summary>
-    public int? Loop { get; set; }
-
-
     /// <summary>
     /// Initializes a new instance of the <see cref="InputFile"/> class.
     /// </summary>
@@ -37,9 +22,8 @@ namespace FfmpegSharp
     /// Initializes a new instance of the <see cref="InputFile"/> class.
     /// </summary>
     public InputFile(string url)
-    : base()
+    : base(url)
     {
-      Url = url;
     }
 
 
@@ -56,16 +40,10 @@ namespace FfmpegSharp
       if (!string.IsNullOrEmpty(baseStr))
         inputOptions.Add(baseStr);
 
-      if (Volume.HasValue)
-        inputOptions.Add("--volume " + Volume.Value);
-
-      if (IgnoreLength.HasValue && (IgnoreLength.Value == true))
-        inputOptions.Add("--ignore-length");
-
-      if (FileName != null)
-        inputOptions.Add(FileName);
+      if (!string.IsNullOrEmpty(Url))
+        inputOptions.Add(Url);
       else
-        inputOptions.Add("--null");
+        throw new FfmpegException("Input file cannot be null");
 
       return string.Join(" ", inputOptions);
     }

@@ -10,7 +10,8 @@ namespace FfmpegSharp
   internal sealed class FfmpegProcess : Process
   {
     public static readonly Regex InfoRegex = new Regex(@"Input File\s*: .+\r?\nChannels\s*: (\d+)\r?\nSample Rate\s*: (\d+)\r?\nPrecision\s*: ([\s\S]+?)\r?\nDuration\s*: (\d{2}:\d{2}:\d{2}\.?\d{2}?)[\s\S]+?\r?\nFile Size\s*: (\d+\.?\d{0,2}?[k|M|G]?)\r?\nBit Rate\s*: (\d+\.?\d{0,2}?[k|M|G]?)\r?\nSample Encoding\s*: (.+)");
-    public static readonly Regex ProgressRegex = new Regex(@"In:(\d{1,3}\.?\d{0,2})%\s+(\d{2}:\d{2}:\d{2}\.?\d{0,2})\s+\[(\d{2}:\d{2}:\d{2}\.?\d{0,2})\]\s+Out:(\d+\.?\d{0,2}[k|M|G]?)");
+    //public static readonly Regex ProgressRegex = new Regex(@"In:(\d{1,3}\.?\d{0,2})%\s+(\d{2}:\d{2}:\d{2}\.?\d{0,2})\s+\[(\d{2}:\d{2}:\d{2}\.?\d{0,2})\]\s+Out:(\d+\.?\d{0,2}[k|M|G]?)");
+    public static readonly Regex ProgressRegex = new Regex(@"frame=\s*(\d+) fps=\s*(\d+[.\d]*) q=\s*(-?\d+[.\d]*) size=\s*(\d+)kB time=\s*(\d{2}:\d{2}:\d{2}\.?\d{0,2}) bitrate=\s*(\d+[.\d]*)kbits");
     public static readonly Regex LogRegex = new Regex(@"(FAIL|WARN|DBUG|INFO)\s(\w+):\s(.+)");
 
 
@@ -33,13 +34,13 @@ namespace FfmpegSharp
     /// <returns>The Ffmpeg process instance.</returns>
     public static FfmpegProcess Create(string path)
     {
-      string soxExecutable;
+      string ffmpegExec;
 
       if (String.IsNullOrEmpty(path))
         throw new FfmpegException("Ffmpeg path not specified");
 
       if (File.Exists(path))
-        soxExecutable = path;
+        ffmpegExec = path;
       else
         throw new FileNotFoundException("Ffmpeg executable not found");
 
@@ -81,10 +82,12 @@ namespace FfmpegSharp
       */
 
       FfmpegProcess ffmpegProc = new FfmpegProcess();
-      ffmpegProc.StartInfo.FileName = soxExecutable;
+      ffmpegProc.StartInfo.FileName = ffmpegExec;
       ffmpegProc.StartInfo.WorkingDirectory = Environment.CurrentDirectory;
 
-      string ffmpegPath = Path.GetDirectoryName(soxExecutable);
+      ffmpegProc.StartInfo.EnvironmentVariables["AV_LOG_FORCE_NOCOLOR"] = "1";
+
+      string ffmpegPath = Path.GetDirectoryName(ffmpegExec);
 
       if (!String.IsNullOrEmpty(ffmpegPath))
       {

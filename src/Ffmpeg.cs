@@ -32,34 +32,14 @@ namespace FfmpegSharp
     public string Path { get; set; }
 
     /// <summary>
-    /// Size of all processing buffers (default is 8192).
-    /// </summary>
-    public uint? Buffer { get; set; }
-
-    /// <summary>
-    /// Enable parallel effects channels processing (where available).
-    /// </summary>
-    public bool? Multithreaded { get; set; }
-
-    /// <summary>
     /// Output format options.
     /// </summary>
-    public OutputFormatOptions Output { get; private set; }
-
-    /// <summary>
-    /// Effects to be applied.
-    /// </summary>
-    public List<IBaseEffect> Effects { get; private set; }
+    public OutputFile Output { get; private set; }
 
     /// <summary>
     /// Custom global arguments.
     /// </summary>
     public string CustomArgs { get; set; }
-
-    /// <summary>
-    /// Custom effects. Add here the command line arguments for any effect not currently implemented in SoXSharp.
-    /// </summary>
-    public string CustomEffects { get; set; }
 
     /// <summary>
     /// Gets the full command line of the last call to Ffmpeg.
@@ -79,8 +59,7 @@ namespace FfmpegSharp
     /// <param name="path">Location of the Ffmpeg executable to be used by the library.</param>
     public Ffmpeg(string path)
     {
-      Output = new OutputFormatOptions();
-      Effects = new List<IBaseEffect>();
+      Output = new OutputFile();
       Path = path;
     }
 
@@ -114,6 +93,10 @@ namespace FfmpegSharp
     {
       if (!File.Exists(inputFile))
         throw new FileNotFoundException("File not found: " + inputFile);
+
+      return new MediaInfo();
+
+      /*
 
       FfmpegProcess_ = FfmpegProcess.Create(Path);
 
@@ -175,6 +158,7 @@ namespace FfmpegSharp
           FfmpegProcess_ = null;
         }
       }
+      */
     }
 
 
@@ -189,74 +173,12 @@ namespace FfmpegSharp
 
 
     /// <summary>
-    /// Spawns a new Ffmpeg process using the specified options in this instance and plays the specified file.
+    /// Spawns a new Ffmpeg process using the specified options in this instance.
     /// </summary>
-    /// <param name="inputFile">Audio file to be played.</param>
-    public void Play(string inputFile)
+    /// <param name="inputFile">Audio file to be processed.</param>
+    public void Process(string inputFile)
     {
-      Process(new InputFile[] { new InputFile(inputFile) }, "--default-device");
-    }
-
-
-    /// <summary>
-    /// Spawns a new Ffmpeg process using the specified options in this instance and plays the specified file.
-    /// </summary>
-    /// <param name="inputFile">Audio file to be played.</param>
-    public void Play(InputFile inputFile)
-    {
-      Process(new InputFile[] { inputFile }, "--default-device");
-    }
-
-
-    /// <summary>
-    /// Spawns a new Ffmpeg process using the specified options in this instance and plays the specified files.
-    /// </summary>
-    /// <param name="inputFiles">Audio files to be played.</param>
-    public void Play(string[] inputFiles)
-    {
-      var inputs = new List<InputFile>(inputFiles.Length);
-
-      foreach (var inputFile in inputFiles)
-        inputs.Add(new InputFile(inputFile));
-
-      Process(inputs.ToArray(), "--default-device");
-    }
-
-
-    /// <summary>
-    /// Spawns a new Ffmpeg process using the specified options in this instance and plays the specified files.
-    /// </summary>
-    /// <param name="inputFiles">Audio files to be played.</param>
-    /// <param name="combination">How to combine the input files.</param>
-    public void Play(string[] inputFiles, CombinationType combination)
-    {
-      var inputs = new List<InputFile>(inputFiles.Length);
-
-      foreach (var inputFile in inputFiles)
-        inputs.Add(new InputFile(inputFile));
-
-      Process(inputs.ToArray(), "--default-device", combination);
-    }
-
-
-    /// <summary>
-    /// Spawns a new Ffmpeg process using the specified options in this instance and plays the specified files.
-    /// </summary>
-    /// <param name="inputFiles">Audio files to be played.</param>
-    public void Play(InputFile[] inputFiles)
-    {
-      Process(inputFiles, "--default-device");
-    }
-
-
-    /// <summary>
-    /// Spawns a new Ffmpeg process using the specified options in this instance and plays the specified files.
-    /// </summary>
-    /// <param name="inputFiles">Audio files to be played.</param>
-    /// <param name="combination">How to combine the input files.</param>
-    public void Play(InputFile[] inputFiles, CombinationType combination)
-    {
-      Process(inputFiles, "--default-device", combination);
+      Process(new InputFile[] { new InputFile(inputFile) }, null);
     }
 
 
@@ -264,9 +186,10 @@ namespace FfmpegSharp
     /// Spawns a new Ffmpeg process using the specified options in this instance.
     /// </summary>
     /// <param name="inputFile">Audio file to be processed.</param>
-    public void Process(string inputFile)
+    /// <param name="outputFile">Output file.</param>
+    public void Process(string inputFile, string outputFile)
     {
-      Process(new InputFile[] { new InputFile(inputFile) }, null);
+      Process(new InputFile[] { new InputFile(inputFile) }, new OutputFile[] { new OutputFile(outputFile) });
     }
 
 
@@ -285,9 +208,9 @@ namespace FfmpegSharp
     /// </summary>
     /// <param name="inputFile">Audio file to be processed.</param>
     /// <param name="outputFile">Output file.</param>
-    public void Process(string inputFile, string outputFile)
+    public void Process(InputFile inputFile, OutputFile outputFile)
     {
-      Process(new InputFile[] { new InputFile(inputFile) }, outputFile);
+      Process(new InputFile[] { inputFile }, new OutputFile[] { outputFile });
     }
 
 
@@ -298,7 +221,7 @@ namespace FfmpegSharp
     /// <param name="outputFile">Output file.</param>
     public void Process(InputFile inputFile, string outputFile)
     {
-      Process(new InputFile[] { inputFile }, outputFile);
+      Process(new InputFile[] { inputFile }, new OutputFile[] { new OutputFile(outputFile) });
     }
 
 
@@ -310,21 +233,9 @@ namespace FfmpegSharp
     /// <param name="outputFile">Output file.</param>
     public void Process(string inputFile1, string inputFile2, string outputFile)
     {
-      Process(new InputFile[] { new InputFile(inputFile1), new InputFile(inputFile2) }, outputFile);
+      Process(new InputFile[] { new InputFile(inputFile1), new InputFile(inputFile2) }, new OutputFile[] { new OutputFile(outputFile) });
     }
 
-
-    /// <summary>
-    /// Spawns a new Ffmpeg process using the specified options in this instance.
-    /// </summary>
-    /// <param name="inputFile1">First audio file to be processed.</param>
-    /// <param name="inputFile2">Second audio file to be processed.</param>
-    /// <param name="outputFile">Output file.</param>
-    /// <param name="combination">How to combine the input files.</param>
-    public void Process(string inputFile1, string inputFile2, string outputFile, CombinationType combination)
-    {
-      Process(new InputFile[] { new InputFile(inputFile1), new InputFile(inputFile2) }, outputFile, combination);
-    }
 
 
     /// <summary>
@@ -335,20 +246,7 @@ namespace FfmpegSharp
     /// <param name="outputFile">Output file.</param>
     public void Process(InputFile inputFile1, InputFile inputFile2, string outputFile)
     {
-      Process(new InputFile[] { inputFile1, inputFile2 }, outputFile);
-    }
-
-
-    /// <summary>
-    /// Spawns a new Ffmpeg process using the specified options in this instance.
-    /// </summary>
-    /// <param name="inputFile1">First audio file to be processed.</param>
-    /// <param name="inputFile2">Second audio file to be processed.</param>
-    /// <param name="outputFile">Output file.</param>
-    /// <param name="combination">How to combine the input files.</param>
-    public void Process(InputFile inputFile1, InputFile inputFile2, string outputFile, CombinationType combination)
-    {
-      Process(new InputFile[] { inputFile1, inputFile2 }, outputFile, combination);
+      Process(new InputFile[] { inputFile1, inputFile2 }, new OutputFile[] { new OutputFile(outputFile) });
     }
 
 
@@ -364,7 +262,7 @@ namespace FfmpegSharp
       foreach (var inputFile in inputFiles)
         inputs.Add(new InputFile(inputFile));
 
-      Process(inputs.ToArray(), outputFile);
+      Process(inputs.ToArray(), new OutputFile[] { new OutputFile(outputFile) });
     }
 
 
@@ -373,15 +271,14 @@ namespace FfmpegSharp
     /// </summary>
     /// <param name="inputFiles">Audio files to be processed.</param>
     /// <param name="outputFile">Output file.</param>
-    /// <param name="combination">How to combine the input files.</param>
-    public void Process(string[] inputFiles, string outputFile, CombinationType combination)
+    public void Process(string[] inputFiles, OutputFile outputFile)
     {
       var inputs = new List<InputFile>(inputFiles.Length);
 
       foreach (var inputFile in inputFiles)
         inputs.Add(new InputFile(inputFile));
 
-      Process(inputs.ToArray(), outputFile, combination);
+      Process(inputs.ToArray(), new OutputFile[] { outputFile });
     }
 
 
@@ -389,20 +286,8 @@ namespace FfmpegSharp
     /// Spawns a new Ffmpeg process using the specified options in this instance.
     /// </summary>
     /// <param name="inputFiles">Audio files to be processed.</param>
-    /// <param name="outputFile">Output file.</param>
-    public void Process(InputFile[] inputFiles, string outputFile)
-    {
-      Process(inputFiles, outputFile, CombinationType.Default);
-    }
-
-
-    /// <summary>
-    /// Spawns a new Ffmpeg process using the specified options in this instance.
-    /// </summary>
-    /// <param name="inputFiles">Audio files to be processed.</param>
-    /// <param name="outputFile">Output file.</param>
-    /// <param name="combination">How to combine the input files.</param>
-    public void Process(InputFile[] inputFiles, string outputFile, CombinationType combination)
+    /// <param name="outputFiles">Output files.</param>
+    public void Process(InputFile[] inputFiles, OutputFile[] outputFiles)
     {
       FfmpegProcess_ = FfmpegProcess.Create(Path);
 
@@ -416,45 +301,12 @@ namespace FfmpegSharp
 
         List<string> args = new List<string>();
 
+        args.Add("-hide_banner");
+
         // Global options.
-
-        if (Buffer.HasValue)
-          args.Add("--buffer " + Buffer.Value);
-
-        if (Multithreaded.HasValue)
-          args.Add(Multithreaded.Value ? "--multi-threaded" : "--single-threaded");
 
         if (!String.IsNullOrEmpty(CustomArgs))
           args.Add(CustomArgs);
-
-        switch (combination)
-        {
-          case CombinationType.Concatenate:
-            args.Add("--combine concatenate");
-            break;
-
-          case CombinationType.Merge:
-            args.Add("--combine merge");
-            break;
-
-          case CombinationType.Mix:
-            args.Add("--combine mix");
-            break;
-
-          case CombinationType.MixPower:
-            args.Add("--combine mix-power");
-            break;
-
-          case CombinationType.Multiply:
-            args.Add("--combine multiply");
-            break;
-
-          case CombinationType.Sequence:
-            args.Add("--combine sequence");
-            break;
-        }
-
-        args.Add("--show-progress");
 
         // Input options and files.
 
@@ -464,23 +316,22 @@ namespace FfmpegSharp
             args.Add(inputFile.ToString());
         }
         else
-          args.Add("--null");
+          throw new FfmpegException("No input files specified");
 
-        // Output options and file.
+        // Output options and files.
 
-        args.Add(Output.ToString());
-
-        if (outputFile != null)
-          args.Add(outputFile);
+        if ((outputFiles != null) && (outputFiles.Length > 0))
+        {
+          foreach (OutputFile outputFile in outputFiles)
+            args.Add(outputFile.ToString());
+        }
         else
-          args.Add("--null");
-
-        // Effects.
-        foreach (IBaseEffect effect in Effects)
-          args.Add(effect.ToString());
-
-        // Custom effects.
-        args.Add(CustomEffects);
+        {
+          if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+            args.Add("NUL");
+          else
+            args.Add("/dev/null");
+        }
 
         FfmpegProcess_.StartInfo.Arguments = String.Join(" ", args);
         LastCommand = Path + " " + FfmpegProcess_.StartInfo.Arguments;
@@ -488,7 +339,7 @@ namespace FfmpegSharp
         try
         {
           FfmpegProcess_.Start();
-          FfmpegProcess_.BeginOutputReadLine();
+          //FfmpegProcess_.BeginOutputReadLine();
           FfmpegProcess_.BeginErrorReadLine();
           FfmpegProcess_.WaitForExit();
         }

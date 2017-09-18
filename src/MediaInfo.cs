@@ -46,7 +46,7 @@ namespace FfmpegSharp
 
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="SoxSharp.AudioInfo"/> class. 
+    /// Initializes a new instance of the <see cref="MediaInfo"/> class. 
     /// </summary>
     /// <param name="channels">Number of audio channels.</param>
     /// <param name="sampleRate">Audio sample rate.</param>
