@@ -50,38 +50,32 @@ namespace FfmpegSharp
     /// <param name="processed">File time that has been processed, based on file total duration.</param>
     /// <param name="remaining">File time pending to be processed, based on file total duration.</param>
     /// <param name="outputSize">Actual size of the generated output file.</param>
-    public ProgressEventArgs(UInt16 progress, TimeSpan processed, TimeSpan remaining, UInt64 outputSize)
+    public ProgressEventArgs(UInt32 frames, UInt16 fps, double q, UInt64 size, TimeSpan time, double bitrate)
     {
-      if (progress > 100)
-        Progress = 100;
-      else
-        Progress = progress;
-
-      Processed = processed;
-      Remaining = remaining;
-      OutputSize = outputSize;
+      Frames = frames;
+      Fps = fps;
+      Q = q;
+      Size = size;
+      Time = time;
+      Bitrate = bitrate;
       Abort = false;
     }
 
-    /// <summary>
-    /// The actual progress value, from 0 to 100.
-    /// </summary>
-    public UInt16 Progress { get; private set; }
+
+    public UInt32 Frames { get; private set; }
+
+    public UInt16 Fps { get; private set; }
+
+    public double Q { get; private set; }
+
+    public UInt64 Size { get; private set; }
 
     /// <summary>
-    /// File time that has been processed, based on file total duration.
+    /// File time that has been processed.
     /// </summary>
-    public TimeSpan Processed { get; private set; }
+    public TimeSpan Time { get; private set; }
 
-    /// <summary>
-    /// File time pending to be processed, based on file total duration.
-    /// </summary>
-    public TimeSpan Remaining { get; private set; }
-
-    /// <summary>
-    /// Actual size of the generated output file.
-    /// </summary>
-    public UInt64 OutputSize { get; private set; }
+    public double Bitrate { get; private set; }
 
     /// <summary>
     /// Allows to cancel the current operation.

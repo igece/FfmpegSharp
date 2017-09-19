@@ -8,7 +8,7 @@ namespace FfmpegSharp
   /// <summary>
   /// Options that are applicable to both input and output files.
   /// </summary>
-  public abstract class FileOptions
+  public abstract class BaseFile
   {
     /// <summary>
     /// File URL.
@@ -31,24 +31,26 @@ namespace FfmpegSharp
     public string CustomArgs { get; set; }
 
 
-    /// <summary>
-    /// Default constructor.
-    /// </summary>
-    protected FileOptions()
-    {
-    }
+    protected Dictionary<byte, Stream> streams_ = new Dictionary<byte, Stream>();
+
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="FileOptions"/> class.
+    /// Initializes a new instance of the <see cref="BaseFile"/> class.
     /// </summary>
-    protected FileOptions(string url)
+    protected BaseFile(string url)
     {
       Url = url;
     }
 
 
+    public void ResetStreams()
+    {
+      streams_.Clear();
+    }
+
+
     /// <summary>
-    /// Translate a <see cref="FileOptions"/> instance to a set of command arguments to be passed to Ffmpeg (invalidates <see cref="Object.ToString()"/>).
+    /// Translate a <see cref="BaseFile"/> instance to a set of command arguments to be passed to Ffmpeg (invalidates <see cref="Object.ToString()"/>).
     /// </summary>
     /// <returns>String containing Ffmpeg command arguments.</returns>
     public override string ToString()

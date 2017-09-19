@@ -60,7 +60,7 @@
   <ItemGroup>
     <Compile Include="Events.cs" />
     <Compile Include="MediaInfo.cs" />
-    <Compile Include="FileOptions.cs" />
+    <Compile Include="BaseFile.cs" />
     <Compile Include="InputFile.cs" />
     <Compile Include="OutputFile.cs" />
     <Compile Include="Resources.Designer.cs">
@@ -76,7 +76,12 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Exceptions\FfmpegException.cs" />
-    <Compile Include="VideoOptions.cs" />
+    <Compile Include="OutputVideoStream.cs" />
+    <Compile Include="Stream.cs" />
+    <Compile Include="OutputAudioStream.cs" />
+    <Compile Include="OutputSubtitleStream.cs" />
+    <Compile Include="InputStream.cs" />
+    <Compile Include="OutputStream.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources.resx">

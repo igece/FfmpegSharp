@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Text.RegularExpressions;
 using FfmpegSharp.Exceptions;
+using System.Threading.Tasks;
 
 
 namespace FfmpegSharp
@@ -31,10 +31,7 @@ namespace FfmpegSharp
     /// <value>The executable path.</value>
     public string Path { get; set; }
 
-    /// <summary>
-    /// Output format options.
-    /// </summary>
-    public OutputFile Output { get; private set; }
+    public bool OverwriteOutput { get; set; }
 
     /// <summary>
     /// Custom global arguments.
@@ -59,7 +56,6 @@ namespace FfmpegSharp
     /// <param name="path">Location of the Ffmpeg executable to be used by the library.</param>
     public Ffmpeg(string path)
     {
-      Output = new OutputFile();
       Path = path;
     }
 
@@ -303,6 +299,9 @@ namespace FfmpegSharp
 
         args.Add("-hide_banner");
 
+        // Avoid FFmpeg asking for overwrite if a specified output file already exists.
+        args.Add(OverwriteOutput ? "-y" : "-n");
+
         // Global options.
 
         if (!String.IsNullOrEmpty(CustomArgs))
@@ -339,7 +338,7 @@ namespace FfmpegSharp
         try
         {
           FfmpegProcess_.Start();
-          //FfmpegProcess_.BeginOutputReadLine();
+          FfmpegProcess_.BeginOutputReadLine();
           FfmpegProcess_.BeginErrorReadLine();
           FfmpegProcess_.WaitForExit();
         }
@@ -388,12 +387,14 @@ namespace FfmpegSharp
           {
             try
             {
-              UInt16 progress = Convert.ToUInt16(double.Parse(matchProgress.Groups[1].Value, CultureInfo.InvariantCulture));
-              TimeSpan processed = TimeSpan.ParseExact(matchProgress.Groups[2].Value, @"hh\:mm\:ss\.ff", CultureInfo.InvariantCulture);
-              TimeSpan remaining = TimeSpan.ParseExact(matchProgress.Groups[3].Value, @"hh\:mm\:ss\.ff", CultureInfo.InvariantCulture);
-              UInt64 outputSize = FormattedSize.ToUInt64(matchProgress.Groups[4].Value);
+              UInt32 frames = UInt32.Parse(matchProgress.Groups[1].Value, CultureInfo.InvariantCulture);
+              UInt16 fps = UInt16.Parse(matchProgress.Groups[2].Value, CultureInfo.InvariantCulture);
+              double q = double.Parse(matchProgress.Groups[3].Value, CultureInfo.InvariantCulture);
+              UInt64 size = UInt64.Parse(matchProgress.Groups[4].Value, CultureInfo.InvariantCulture);
+              TimeSpan time = TimeSpan.ParseExact(matchProgress.Groups[5].Value, @"hh\:mm\:ss\.ff", CultureInfo.InvariantCulture);
+              double bitrate = double.Parse(matchProgress.Groups[6].Value, CultureInfo.InvariantCulture);
 
-              ProgressEventArgs eventArgs = new ProgressEventArgs(progress, processed, remaining, outputSize);
+              ProgressEventArgs eventArgs = new ProgressEventArgs(frames, fps, q, size, time, bitrate);
               OnProgress(sender, eventArgs);
 
               if (eventArgs.Abort)
@@ -430,6 +431,7 @@ namespace FfmpegSharp
       {
         try
         {
+          //FfmpegProcess_.StandardInput.Write('q');
           FfmpegProcess_.Kill();
         }
 
@@ -475,6 +477,9 @@ namespace FfmpegSharp
 
         return true;
       }
+
+      else
+        OnLogMessage(this, new LogMessageEventArgs(LogLevelType.Info, "unknown", data));
 
       return false;
     }
