@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using FfmpegSharp.Exceptions;
+using System;
 
 
 namespace FfmpegSharp
@@ -7,14 +8,24 @@ namespace FfmpegSharp
   /// <summary>
   /// Input format options.
   /// </summary>
-  public class InputFile : BaseFile
+  public class InputFile : BaseFile, IInput
   {
+    public TimeSpan? Offset { get; set; }
+
+    public InputVideoStream Video { get; private set; }
+    public InputAudioStream Audio { get; private set; }
+    public InputSubtitleStream Subtitles { get; private set; }
+
+
     /// <summary>
     /// Initializes a new instance of the <see cref="InputFile"/> class.
     /// </summary>
     public InputFile(string url)
     : base(url)
     {
+      Video = new InputVideoStream();
+      Audio = new InputAudioStream();
+      Subtitles = new InputSubtitleStream();
     }
 
 
@@ -40,8 +51,20 @@ namespace FfmpegSharp
       if (!string.IsNullOrEmpty(baseStr))
         args.Add(baseStr);
 
+      args.Add(Video.ToString());
+      args.Add(Audio.ToString());
+      args.Add(Subtitles.ToString());
+
+      if (Offset.HasValue)
+        args.Add("-itsoffset " + Offset.Value.TotalSeconds);
+
       if (!string.IsNullOrEmpty(Url))
-        args.Add("-i " + Url);
+      {
+        if (Url.Contains(" "))
+          args.Add("-i \"" + Url + "\"");
+        else
+          args.Add("-i " + Url);
+      }
       else
         throw new FfmpegException("Input file cannot be null");
 

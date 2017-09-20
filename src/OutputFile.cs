@@ -8,11 +8,14 @@ namespace FfmpegSharp
   /// <summary>
   ///  Options to be applied to an output file.
   /// </summary>
-  public class OutputFile : BaseFile
+  public class OutputFile : BaseFile, IOutput
   {
-    public OutputVideoStream Video { get; private set; }
+    public TargetType? Target { get; set; }
+    public DateTime? Timestamp { get; set; }
 
-    public string CustomFilters { get; set; }
+    public OutputVideoStream Video { get; private set; }
+    public OutputAudioStream Audio { get; private set; }
+    public OutputSubtitleStream Subtitles { get; private set; }
 
 
     /// <summary>
@@ -22,6 +25,8 @@ namespace FfmpegSharp
       : base(url)
     {
       Video = new OutputVideoStream();
+      Audio = new OutputAudioStream();
+      Subtitles = new OutputSubtitleStream();
     }
 
 
@@ -47,10 +52,29 @@ namespace FfmpegSharp
       if (!string.IsNullOrEmpty(baseStr))
         args.Add(baseStr);
 
+      if (Target.HasValue)
+      {
+        switch (Target.Value)
+        {
+          case TargetType.Vcd: args.Add("-target vcd"); break;
+          case TargetType.Svcd: args.Add("-target svcd"); break;
+        }
+      }
+
+      if (Timestamp.HasValue)
+        args.Add("-timestamp " + Timestamp.Value.ToString("yyyy-MM-dd HH:mm:ss.ff"));
+
       args.Add(Video.ToString());
+      args.Add(Audio.ToString());
+      args.Add(Subtitles.ToString());
 
       if (!String.IsNullOrEmpty(Url))
-        args.Add(Url);
+      {
+        if (Url.Contains(" "))
+          args.Add("\"" + Url + "\"");
+        else
+          args.Add(Url);
+      }
       else
       {
         if (Environment.OSVersion.Platform == PlatformID.Win32NT)

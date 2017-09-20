@@ -3,7 +3,7 @@
 
 namespace FfmpegSharp
 {
-  public class OutputAudioStream : OutputStream
+  public class OutputAudioStream : OutputStream, IAudio
   {
     public OutputAudioStream()
       : base()

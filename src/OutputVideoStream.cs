@@ -3,12 +3,11 @@
 
 namespace FfmpegSharp
 {
-  public class OutputVideoStream : OutputStream
+  public class OutputVideoStream : OutputStream, IVideo
   {
     public OutputVideoStream()
       : base()
     {
-      //Codec = "copy";
     }
 
 

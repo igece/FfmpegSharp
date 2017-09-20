@@ -3,7 +3,7 @@
 
 namespace FfmpegSharp
 {
-  public abstract class InputStream : Stream
+  public abstract class InputStream : Stream, IInput
   {
     public InputStream()
       : base()
@@ -24,14 +24,14 @@ namespace FfmpegSharp
     /// <returns>String containing Ffmpeg command arguments.</returns>
     public override string ToString()
     {
-      List<string> inputStreamArgs = new List<string>();
+      List<string> args = new List<string>();
 
       string baseStr = base.ToString();
 
       if (!string.IsNullOrEmpty(baseStr))
-        inputStreamArgs.Add(baseStr);
+        args.Add(baseStr);
 
-      return string.Join(" ", inputStreamArgs);
+      return string.Join(" ", args);
     }
   }
 }

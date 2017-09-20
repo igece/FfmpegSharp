@@ -16,14 +16,9 @@ namespace FfmpegSharp
   public class Ffmpeg : IDisposable
   {
     /// <summary>
-    /// Provides updated progress status while Ffmpeg is being executed.
+    /// Provides updated progress status while FFmpeg is being executed.
     /// </summary>
     public event EventHandler<ProgressEventArgs> OnProgress = null;
-
-    /// <summary>
-    /// Occurs when Ffmpeg generates any non-FAIL log message.
-    /// </summary>
-    public event EventHandler<LogMessageEventArgs> OnLogMessage = null;
 
     /// <summary>
     /// Location of the Ffmpeg executable to be used by the library.
@@ -45,8 +40,6 @@ namespace FfmpegSharp
 
 
     private FfmpegProcess FfmpegProcess_ = null;
-    private string lastError_ = null;
-    private string lastErrorSource_ = null;
     private bool disposed_ = false;
 
 
@@ -90,88 +83,90 @@ namespace FfmpegSharp
       if (!File.Exists(inputFile))
         throw new FileNotFoundException("File not found: " + inputFile);
 
-      return new MediaInfo();
-
-      /*
-
-      FfmpegProcess_ = FfmpegProcess.Create(Path);
-
-      lastError_ = null;
-      lastErrorSource_ = null;
+      FfmpegProcess ffmpeg = FfmpegProcess.Create(Path);
 
       try
       {
-        FfmpegProcess_.StartInfo.RedirectStandardOutput = true;
-        FfmpegProcess_.StartInfo.Arguments = "--info " + inputFile;
-        FfmpegProcess_.Start();
+        ffmpeg.StartInfo.RedirectStandardError = true;
+        ffmpeg.StartInfo.Arguments = "-hide_banner -i " + inputFile;
+        ffmpeg.Start();
 
-        LastCommand = Path + " " + FfmpegProcess_.StartInfo.Arguments;
+        LastCommand = Path + " " + ffmpeg.StartInfo.Arguments;
 
-        string output = FfmpegProcess_.StandardOutput.ReadToEnd();
+        string output = ffmpeg.StandardError.ReadToEnd();
 
-        if (String.IsNullOrEmpty(output))
-          output = FfmpegProcess_.StandardError.ReadToEnd();
-
-        if (FfmpegProcess_.WaitForExit(10000) == false)
-          throw new TimeoutException("Ffmpeg response timeout");
-
-        CheckForLogMessage(output);
+        if (ffmpeg.WaitForExit(10000) == false)
+          throw new TimeoutException("FFmpeg response timeout");
 
         if (output != null)
         {
-          Match matchInfo = FfmpegProcess.InfoRegex.Match(output);
+          TimeSpan? duration = null;
 
-          if (matchInfo.Success)
+          try
           {
-            try
-            {
-              UInt16 channels = Convert.ToUInt16(double.Parse(matchInfo.Groups[1].Value, CultureInfo.InvariantCulture));
-              UInt32 sampleRate = Convert.ToUInt32(double.Parse(matchInfo.Groups[2].Value, CultureInfo.InvariantCulture));
-              UInt16 sampleSize = Convert.ToUInt16(double.Parse(new string(matchInfo.Groups[3].Value.Where(Char.IsDigit).ToArray()), CultureInfo.InvariantCulture));
-              TimeSpan duration = TimeSpan.ParseExact(matchInfo.Groups[4].Value, @"hh\:mm\:ss\.ff", CultureInfo.InvariantCulture);
-              UInt64 size = FormattedSize.ToUInt64(matchInfo.Groups[5].Value);
-              UInt32 bitRate = FormattedSize.ToUInt32(matchInfo.Groups[6].Value);
-              string encoding = matchInfo.Groups[7].Value;
+            Match matchDuration = FfmpegProcess.DurationRegEx.Match(output);
 
-              return new MediaInfo(channels, sampleRate, sampleSize, duration, size, bitRate, encoding);
-            }
+            if (!matchDuration.Success)
+              throw new FfmpegException("Unexpected output from FFmpeg");
 
-            catch (Exception ex)
-            {
-              throw new FfmpegException("Cannot parse Ffmpeg output", ex);
-            }
+            if (!"N/A".Equals(matchDuration.Groups[1].Value))
+              duration = TimeSpan.ParseExact(matchDuration.Groups[1].Value, @"hh\:mm\:ss\.ff", CultureInfo.InvariantCulture);
+
+            return new MediaInfo(duration);
+          }
+
+          catch (Exception ex)
+          {
+            throw new FfmpegException("Unexpected output from FFmpeg", ex);
           }
         }
 
-        throw new FfmpegException("Unexpected output from Ffmpeg");
+        throw new FfmpegException("Unexpected output from FFmpeg");
       }
 
       finally
       {
-        if (FfmpegProcess_ != null)
-        {
-          FfmpegProcess_.Dispose();
-          FfmpegProcess_ = null;
-        }
+        if (ffmpeg != null)
+          ffmpeg.Dispose();
       }
-      */
     }
 
 
     /// <summary>
-    /// Spawns a new Ffmpeg process using the specified options in this instance and record audio the specified file.
+    /// Spawns a new Ffmpeg process using the specified options in this instance and starts recording from the record audio the specified file.
     /// </summary>
-    /// <param name="outputFile">Audio file to be recorded.</param>
-    public void Record(string outputFile)
+    /// <param name="outputFile">Media file to be recorded.</param>
+    public void Record(string inputDevice, string outputFile)
     {
-      Process("--default-device", outputFile);
+      InputFile device = new InputFile(inputDevice);
+
+      switch (Environment.OSVersion.Platform)
+      {
+        case PlatformID.Win32NT:
+        case PlatformID.Win32S:
+
+          device.Format = "dshow";
+          break;
+
+        case PlatformID.MacOSX:
+
+          device.Format = "avfoundation";
+          break;
+
+        case PlatformID.Unix:
+
+          device.Format = "x11grab";
+          break;
+      }
+
+      Process(device, outputFile);
     }
 
 
     /// <summary>
     /// Spawns a new Ffmpeg process using the specified options in this instance.
     /// </summary>
-    /// <param name="inputFile">Audio file to be processed.</param>
+    /// <param name="inputFile">Media file to be processed.</param>
     public void Process(string inputFile)
     {
       Process(new InputFile[] { new InputFile(inputFile) }, null);
@@ -181,7 +176,7 @@ namespace FfmpegSharp
     /// <summary>
     /// Spawns a new Ffmpeg process using the specified options in this instance.
     /// </summary>
-    /// <param name="inputFile">Audio file to be processed.</param>
+    /// <param name="inputFile">Media file to be processed.</param>
     /// <param name="outputFile">Output file.</param>
     public void Process(string inputFile, string outputFile)
     {
@@ -192,7 +187,7 @@ namespace FfmpegSharp
     /// <summary>
     /// Spawns a new Ffmpeg process using the specified options in this instance.
     /// </summary>
-    /// <param name="inputFile">Audio file to be processed.</param>
+    /// <param name="inputFile">Media file to be processed.</param>
     public void Process(InputFile inputFile)
     {
       Process(new InputFile[] { inputFile }, null);
@@ -202,7 +197,7 @@ namespace FfmpegSharp
     /// <summary>
     /// Spawns a new Ffmpeg process using the specified options in this instance.
     /// </summary>
-    /// <param name="inputFile">Audio file to be processed.</param>
+    /// <param name="inputFile">Media file to be processed.</param>
     /// <param name="outputFile">Output file.</param>
     public void Process(InputFile inputFile, OutputFile outputFile)
     {
@@ -213,7 +208,7 @@ namespace FfmpegSharp
     /// <summary>
     /// Spawns a new Ffmpeg process using the specified options in this instance.
     /// </summary>
-    /// <param name="inputFile">Audio file to be processed.</param>
+    /// <param name="inputFile">Media file to be processed.</param>
     /// <param name="outputFile">Output file.</param>
     public void Process(InputFile inputFile, string outputFile)
     {
@@ -224,8 +219,19 @@ namespace FfmpegSharp
     /// <summary>
     /// Spawns a new Ffmpeg process using the specified options in this instance.
     /// </summary>
-    /// <param name="inputFile1">First audio file to be processed.</param>
-    /// <param name="inputFile2">Second audio file to be processed.</param>
+    /// <param name="inputFile">Media file to be processed.</param>
+    /// <param name="outputFile">Output file.</param>
+    public void Process(string inputFile, OutputFile outputFile)
+    {
+      Process(new InputFile[] { new InputFile(inputFile) }, new OutputFile[] { outputFile });
+    }
+
+
+    /// <summary>
+    /// Spawns a new Ffmpeg process using the specified options in this instance.
+    /// </summary>
+    /// <param name="inputFile1">First media file to be processed.</param>
+    /// <param name="inputFile2">Second media file to be processed.</param>
     /// <param name="outputFile">Output file.</param>
     public void Process(string inputFile1, string inputFile2, string outputFile)
     {
@@ -233,12 +239,11 @@ namespace FfmpegSharp
     }
 
 
-
     /// <summary>
     /// Spawns a new Ffmpeg process using the specified options in this instance.
     /// </summary>
-    /// <param name="inputFile1">First audio file to be processed.</param>
-    /// <param name="inputFile2">Second audio file to be processed.</param>
+    /// <param name="inputFile1">First media file to be processed.</param>
+    /// <param name="inputFile2">Second media file to be processed.</param>
     /// <param name="outputFile">Output file.</param>
     public void Process(InputFile inputFile1, InputFile inputFile2, string outputFile)
     {
@@ -249,7 +254,7 @@ namespace FfmpegSharp
     /// <summary>
     /// Spawns a new Ffmpeg process using the specified options in this instance.
     /// </summary>
-    /// <param name="inputFiles">Audio files to be processed.</param>
+    /// <param name="inputFiles">Media files to be processed.</param>
     /// <param name="outputFile">Output file.</param>
     public void Process(string[] inputFiles, string outputFile)
     {
@@ -265,7 +270,7 @@ namespace FfmpegSharp
     /// <summary>
     /// Spawns a new Ffmpeg process using the specified options in this instance.
     /// </summary>
-    /// <param name="inputFiles">Audio files to be processed.</param>
+    /// <param name="inputFiles">Media files to be processed.</param>
     /// <param name="outputFile">Output file.</param>
     public void Process(string[] inputFiles, OutputFile outputFile)
     {
@@ -281,25 +286,25 @@ namespace FfmpegSharp
     /// <summary>
     /// Spawns a new Ffmpeg process using the specified options in this instance.
     /// </summary>
-    /// <param name="inputFiles">Audio files to be processed.</param>
+    /// <param name="inputFiles">Media files to be processed.</param>
     /// <param name="outputFiles">Output files.</param>
     public void Process(InputFile[] inputFiles, OutputFile[] outputFiles)
     {
       FfmpegProcess_ = FfmpegProcess.Create(Path);
 
-      lastError_ = null;
-      lastErrorSource_ = null;
-
       try
       {
-        FfmpegProcess_.ErrorDataReceived += OnFfmpegProcessOutputReceived;
-        FfmpegProcess_.OutputDataReceived += OnFfmpegProcessOutputReceived;
+        FfmpegProcess_.ErrorDataReceived += OnFfmpegOutputReceived;
 
         List<string> args = new List<string>();
 
         args.Add("-hide_banner");
+        args.Add("-nostdin");
+        args.Add("-stats");
+        args.Add("-loglevel fatal");
 
         // Avoid FFmpeg asking for overwrite if a specified output file already exists.
+
         args.Add(OverwriteOutput ? "-y" : "-n");
 
         // Global options.
@@ -338,29 +343,13 @@ namespace FfmpegSharp
         try
         {
           FfmpegProcess_.Start();
-          FfmpegProcess_.BeginOutputReadLine();
           FfmpegProcess_.BeginErrorReadLine();
           FfmpegProcess_.WaitForExit();
         }
 
         catch (Exception ex)
         {
-          throw new FfmpegException("Cannot spawn Ffmpeg process", ex);
-        }
-
-        if (!String.IsNullOrEmpty(lastError_))
-        {
-          if (String.IsNullOrEmpty(lastErrorSource_))
-            throw new FfmpegException(lastError_);
-
-          switch (lastErrorSource_)
-          {
-            case "getopt":
-              throw new FfmpegException("Invalid parameter: " + lastError_);
-
-            default:
-              throw new FfmpegException("Processing error: " + lastError_);
-          }
+          throw new FfmpegException("Cannot spawn FFmpeg process", ex);
         }
       }
 
@@ -375,49 +364,50 @@ namespace FfmpegSharp
     }
 
 
-    private void OnFfmpegProcessOutputReceived(object sender, DataReceivedEventArgs received)
+    private void OnFfmpegOutputReceived(object sender, DataReceivedEventArgs received)
     {
       if (received.Data != null)
       {
+        Match matchProgress = FfmpegProcess.ProgressRegex.Match(received.Data);
+
+        // Ass FFmpeg is always executed with the '-stats' and '-loglevel fatal' arguments,
+        // any message not matching the stats pattern is a fatal error.
+
+        if (!matchProgress.Success)
+          ParseFatalError(received.Data);
+
         if (OnProgress != null)
         {
-          Match matchProgress = FfmpegProcess.ProgressRegex.Match(received.Data);
-
-          if (matchProgress.Success)
+          try
           {
-            try
-            {
-              UInt32 frames = UInt32.Parse(matchProgress.Groups[1].Value, CultureInfo.InvariantCulture);
-              UInt16 fps = UInt16.Parse(matchProgress.Groups[2].Value, CultureInfo.InvariantCulture);
-              double q = double.Parse(matchProgress.Groups[3].Value, CultureInfo.InvariantCulture);
-              UInt64 size = UInt64.Parse(matchProgress.Groups[4].Value, CultureInfo.InvariantCulture);
-              TimeSpan time = TimeSpan.ParseExact(matchProgress.Groups[5].Value, @"hh\:mm\:ss\.ff", CultureInfo.InvariantCulture);
-              double bitrate = double.Parse(matchProgress.Groups[6].Value, CultureInfo.InvariantCulture);
+            UInt32 frames = UInt32.Parse(matchProgress.Groups[1].Value, CultureInfo.InvariantCulture);
+            double fps = double.Parse(matchProgress.Groups[2].Value, CultureInfo.InvariantCulture);
+            double q = double.Parse(matchProgress.Groups[3].Value, CultureInfo.InvariantCulture);
+            UInt64 size = UInt64.Parse(matchProgress.Groups[4].Value, CultureInfo.InvariantCulture) * 1024;
+            TimeSpan time = TimeSpan.ParseExact(matchProgress.Groups[5].Value, @"hh\:mm\:ss\.ff", CultureInfo.InvariantCulture);
+            double bitrate = double.Parse(matchProgress.Groups[6].Value, CultureInfo.InvariantCulture) * 1000;
 
-              ProgressEventArgs eventArgs = new ProgressEventArgs(frames, fps, q, size, time, bitrate);
-              OnProgress(sender, eventArgs);
+            ProgressEventArgs progressEventArgs = new ProgressEventArgs(frames, fps, q, size, time, bitrate);
+            OnProgress(sender, progressEventArgs);
 
-              if (eventArgs.Abort)
-                Abort();
+            if (progressEventArgs.Abort)
+              Abort();
 
-              return;
-            }
+            return;
+          }
 
-            catch (OverflowException)
-            {
-              // Ffmpeg v14.3.1 (at least) sometimes report invalid time values (i.e. 06:31:60.00).
-              // Just ignore this progress update.
-              return;
-            }
+          catch (OverflowException)
+          {
+            // Ffmpeg v14.3.1 (at least) sometimes report invalid time values (i.e. 06:31:60.00).
+            // Just ignore this progress update.
+            return;
+          }
 
-            catch (Exception ex)
-            {
-              throw new FfmpegException("Unexpected output from Ffmpeg", ex);
-            }
+          catch (Exception ex)
+          {
+            throw new FfmpegException("Unexpected output from FFmpeg", ex);
           }
         }
-
-        CheckForLogMessage(received.Data);
       }
     }
 
@@ -444,44 +434,23 @@ namespace FfmpegSharp
     }
 
 
-    protected bool CheckForLogMessage(string data)
+    protected void ParseFatalError(string data)
     {
       if (string.IsNullOrEmpty(data))
-        return false;
+        return;
 
       Match logMatch = FfmpegProcess.LogRegex.Match(data);
 
-      if (logMatch.Success)
+      string source = logMatch.Success ? logMatch.Groups[1].Value : "ffmpeg";
+      string message = logMatch.Success ? logMatch.Groups[2].Value : data;
+
+      if (!String.IsNullOrEmpty(message))
       {
-        string logLevel = logMatch.Groups[1].Value;
-        string source = logMatch.Groups[2].Value;
-        string message = logMatch.Groups[3].Value;
+        if (String.IsNullOrEmpty(source))
+          throw new FfmpegFatalErrorException("ffmpeg", message);
 
-        if ("DBUG".Equals(logLevel) && (OnLogMessage != null))
-          OnLogMessage(this, new LogMessageEventArgs(LogLevelType.Debug, source, message));
-
-        if ("INFO".Equals(logLevel) && (OnLogMessage != null))
-          OnLogMessage(this, new LogMessageEventArgs(LogLevelType.Info, source, message));
-
-        if ("WARN".Equals(logLevel) && (OnLogMessage != null))
-          OnLogMessage(this, new LogMessageEventArgs(LogLevelType.Warning, source, message));
-
-        else if ("FAIL".Equals(logLevel))
-        {
-          if (String.IsNullOrEmpty(lastError_))
-            lastError_ = message;
-
-          if (String.IsNullOrEmpty(lastErrorSource_))
-            lastErrorSource_ = source;
-        }
-
-        return true;
+        throw new FfmpegFatalErrorException(source, message);
       }
-
-      else
-        OnLogMessage(this, new LogMessageEventArgs(LogLevelType.Info, "unknown", data));
-
-      return false;
     }
 
 

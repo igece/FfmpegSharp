@@ -26,12 +26,13 @@ namespace FfmpegSharp
     public TimeSpan? SeekFromEnd { get; set; }
 
     /// <summary>
-    /// Custom format arguments.
+    /// Custom file arguments.
     /// </summary>
-    public string CustomArgs { get; set; }
+    public readonly Dictionary<string, string> CustomArgs = new Dictionary<string, string>();
 
 
-    protected Dictionary<byte, Stream> streams_ = new Dictionary<byte, Stream>();
+
+    protected readonly Dictionary<byte, Stream> streams_ = new Dictionary<byte, Stream>();
 
 
     /// <summary>
@@ -55,24 +56,29 @@ namespace FfmpegSharp
     /// <returns>String containing Ffmpeg command arguments.</returns>
     public override string ToString()
     {
-      List<string> fileOptions = new List<string>();
+      List<string> args = new List<string>();
 
       if (!String.IsNullOrEmpty(Format))
-        fileOptions.Add("-f " + Format.ToLower());
+        args.Add("-f " + Format.ToLower());
 
       if (Duration.HasValue)
-        fileOptions.Add("-t " + Duration.Value.TotalSeconds.ToString(CultureInfo.InvariantCulture));
+        args.Add("-t " + Duration.Value.TotalSeconds.ToString(CultureInfo.InvariantCulture));
 
       if (Seek.HasValue)
-        fileOptions.Add("-ss " + Seek.Value.TotalSeconds.ToString(CultureInfo.InvariantCulture));
+        args.Add("-ss " + Seek.Value.TotalSeconds.ToString(CultureInfo.InvariantCulture));
 
       if (SeekFromEnd.HasValue)
-        fileOptions.Add("-sseof " + SeekFromEnd.Value.TotalSeconds.ToString(CultureInfo.InvariantCulture));
+        args.Add("-sseof " + SeekFromEnd.Value.TotalSeconds.ToString(CultureInfo.InvariantCulture));
 
-      if (!String.IsNullOrEmpty(CustomArgs))
-        fileOptions.Add(CustomArgs);
+      foreach (var customArg in CustomArgs)
+      {
+        if (string.IsNullOrEmpty(customArg.Value))
+          args.Add("-" + customArg.Key);
+        else
+          args.Add(string.Format("-{0} {1}", customArg.Key, customArg.Value));
+      }
 
-      return string.Join(" ", fileOptions);
+      return string.Join(" ", args);
     }
   }
 }

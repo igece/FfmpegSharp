@@ -10,39 +10,9 @@ namespace FfmpegSharp
   public struct MediaInfo
   {
     /// <summary>
-    /// Number of audio channels.
+    /// Media time length. 
     /// </summary>
-    public readonly UInt16 Channels;
-
-    /// <summary>
-    /// Audio sample rate.
-    /// </summary>
-    public readonly UInt32 SampleRate;
-
-    /// <summary>
-    /// Audio sample size (bits).
-    /// </summary>
-    public readonly UInt16 SampleSize;
-
-    /// <summary>
-    /// Audio time length. 
-    /// </summary>
-    public readonly TimeSpan Duration;
-
-    /// <summary>
-    /// Audio file size.
-    /// </summary>
-    public readonly UInt64 Size;
-
-    /// <summary>
-    /// Audio bitrate.
-    /// </summary>
-    public readonly UInt32 BitRate;
-
-    /// <summary>
-    /// Audio format.
-    /// </summary>
-    public readonly string Format;
+    public readonly TimeSpan? Duration;
 
 
     /// <summary>
@@ -55,15 +25,9 @@ namespace FfmpegSharp
     /// <param name="size">Audio file size</param>
     /// <param name="bitRate"></param>
     /// <param name="format">Audio format.</param>
-    public MediaInfo(UInt16 channels, UInt32 sampleRate, UInt16 sampleSize, TimeSpan duration, UInt64 size, UInt32 bitRate, string format)
+    public MediaInfo(TimeSpan? duration)
     {
-      Channels = channels;
-      SampleRate = sampleRate;
-      SampleSize = sampleSize;
       Duration = duration;
-      Size = size;
-      BitRate = bitRate;
-      Format = format;
     }
 
 
@@ -75,13 +39,10 @@ namespace FfmpegSharp
     {
       StringBuilder result = new StringBuilder();
 
-      result.AppendLine("Channels: " + Channels);
-      result.AppendLine("Sample Rate: " + SampleRate);
-      result.AppendLine("Sample Size: " + SampleSize);
-      result.AppendLine("Duration: " + Duration.ToString(@"hh\:mm\:ss\.ff"));
-      result.AppendLine("Size: " + Size);
-      result.AppendLine("BitRate: " + BitRate);
-      result.AppendLine("Format: " + Format);
+      if (Duration.HasValue)
+        result.AppendLine("Duration: " + Duration.Value.ToString(@"hh\:mm\:ss\.ff"));
+      else
+        result.AppendLine("Duration: N/A");
 
       return result.ToString();
     }

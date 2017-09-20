@@ -3,7 +3,7 @@
 
 namespace FfmpegSharp
 {
-  public class OutputSubtitleStream : OutputStream
+  public class OutputSubtitleStream : OutputStream, ISubtitle
   {
     public OutputSubtitleStream()
       : base()
