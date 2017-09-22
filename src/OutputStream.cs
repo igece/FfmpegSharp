@@ -1,22 +1,28 @@
 ﻿using System.Collections.Generic;
+using System;
+using System.Security.Policy;
 
 
 namespace FfmpegSharp
 {
   public abstract class OutputStream : Stream, IOutput
   {
+    public string Filter { get; set; }
+
     public int? MaxFrames { get; set; }
 
     public StreamDisposition? Disposition { get; set; }
 
+    public UInt16? Qscale { get; set; }
 
-    public OutputStream()
+
+    protected OutputStream()
       : base()
     {
     }
 
 
-    public OutputStream(byte id)
+    protected OutputStream(byte id)
       : base(id)
     {
     }
@@ -58,11 +64,17 @@ namespace FfmpegSharp
           case StreamDisposition.Metadata: dispositionStr = "metadata"; break;
         }
 
-        args.Add(string.Format("-disposition:{0} {1}", IdStr, dispositionStr));
+        args.Add(string.Format("-disposition{0} {1}", IdStr, dispositionStr));
       }
 
+      if (!string.IsNullOrEmpty(Filter))
+        args.Add(string.Format("-filter{0} {1}", IdStr, Filter));
+
       if (MaxFrames.HasValue)
-        args.Add(string.Format("-frames:{0} {1}", IdStr, MaxFrames.Value));
+        args.Add(string.Format("-frames{0} {1}", IdStr, MaxFrames.Value));
+
+      if (Qscale.HasValue)
+        args.Add(string.Format("-qscale{0} {1}", IdStr, Qscale.Value));
 
       return string.Join(" ", args);
     }

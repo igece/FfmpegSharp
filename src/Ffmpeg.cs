@@ -83,9 +83,7 @@ namespace FfmpegSharp
       if (!File.Exists(inputFile))
         throw new FileNotFoundException("File not found: " + inputFile);
 
-      FfmpegProcess ffmpeg = FfmpegProcess.Create(Path);
-
-      try
+      using (FfmpegProcess ffmpeg = FfmpegProcess.Create(Path))
       {
         ffmpeg.StartInfo.RedirectStandardError = true;
         ffmpeg.StartInfo.Arguments = "-hide_banner -i " + inputFile;
@@ -100,34 +98,32 @@ namespace FfmpegSharp
 
         if (output != null)
         {
-          TimeSpan? duration = null;
+          TimeSpan duration = TimeSpan.MinValue;
 
-          try
+          Match matchDuration = FfmpegProcess.DurationRegEx.Match(output);
+          //Match matchVideoMetadata = FfmpegProcess.VideoMetadataRegEx.Match(output);
+
+          if (!matchDuration.Success)
+            throw new FfmpegException("Unexpected output from FFmpeg");
+
+          TimeSpan.TryParseExact(matchDuration.Groups[1].Value, @"hh\:mm\:ss\.ff", CultureInfo.InvariantCulture, out duration);
+
+          /*
+          if (matchVideoMetadata.Success)
           {
-            Match matchDuration = FfmpegProcess.DurationRegEx.Match(output);
+            Match matchVideoDetails = FfmpegProcess.VideoDetailsRegEx.Match(matchVideoMetadata.Groups[1].Value);
 
-            if (!matchDuration.Success)
-              throw new FfmpegException("Unexpected output from FFmpeg");
-
-            if (!"N/A".Equals(matchDuration.Groups[1].Value))
-              duration = TimeSpan.ParseExact(matchDuration.Groups[1].Value, @"hh\:mm\:ss\.ff", CultureInfo.InvariantCulture);
-
-            return new MediaInfo(duration);
+            if (matchVideoDetails.Success)
+            {
+              
+            }
           }
+          */
 
-          catch (Exception ex)
-          {
-            throw new FfmpegException("Unexpected output from FFmpeg", ex);
-          }
+          return new MediaInfo(duration);
         }
 
         throw new FfmpegException("Unexpected output from FFmpeg");
-      }
-
-      finally
-      {
-        if (ffmpeg != null)
-          ffmpeg.Dispose();
       }
     }
 
@@ -370,7 +366,7 @@ namespace FfmpegSharp
       {
         Match matchProgress = FfmpegProcess.ProgressRegex.Match(received.Data);
 
-        // Ass FFmpeg is always executed with the '-stats' and '-loglevel fatal' arguments,
+        // As FFmpeg is always executed with the '-stats' and '-loglevel fatal' arguments,
         // any message not matching the stats pattern is a fatal error.
 
         if (!matchProgress.Success)
@@ -378,14 +374,24 @@ namespace FfmpegSharp
 
         if (OnProgress != null)
         {
+          UInt32 frames = 0;
+          double fps = 0.0;
+          double q = 0.0;
+          UInt64 size = 0;
+          TimeSpan time = TimeSpan.Zero;
+          double bitrate = 0.0;
+
           try
           {
-            UInt32 frames = UInt32.Parse(matchProgress.Groups[1].Value, CultureInfo.InvariantCulture);
-            double fps = double.Parse(matchProgress.Groups[2].Value, CultureInfo.InvariantCulture);
-            double q = double.Parse(matchProgress.Groups[3].Value, CultureInfo.InvariantCulture);
-            UInt64 size = UInt64.Parse(matchProgress.Groups[4].Value, CultureInfo.InvariantCulture) * 1024;
-            TimeSpan time = TimeSpan.ParseExact(matchProgress.Groups[5].Value, @"hh\:mm\:ss\.ff", CultureInfo.InvariantCulture);
-            double bitrate = double.Parse(matchProgress.Groups[6].Value, CultureInfo.InvariantCulture) * 1000;
+            UInt32.TryParse(matchProgress.Groups[1].Value, NumberStyles.Integer, CultureInfo.InvariantCulture, out frames);
+            double.TryParse(matchProgress.Groups[2].Value, NumberStyles.Float, CultureInfo.InvariantCulture, out fps);
+            double.TryParse(matchProgress.Groups[3].Value, NumberStyles.Float, CultureInfo.InvariantCulture, out q);
+            UInt64.TryParse(matchProgress.Groups[4].Value, NumberStyles.Integer, CultureInfo.InvariantCulture, out size);
+            TimeSpan.TryParseExact(matchProgress.Groups[5].Value, @"hh\:mm\:ss\.ff", CultureInfo.InvariantCulture, out time);
+            double.TryParse(matchProgress.Groups[6].Value, NumberStyles.Float, CultureInfo.InvariantCulture, out bitrate);
+
+            size *= 1024;
+            bitrate *= 1000;
 
             ProgressEventArgs progressEventArgs = new ProgressEventArgs(frames, fps, q, size, time, bitrate);
             OnProgress(sender, progressEventArgs);
@@ -393,13 +399,6 @@ namespace FfmpegSharp
             if (progressEventArgs.Abort)
               Abort();
 
-            return;
-          }
-
-          catch (OverflowException)
-          {
-            // Ffmpeg v14.3.1 (at least) sometimes report invalid time values (i.e. 06:31:60.00).
-            // Just ignore this progress update.
             return;
           }
 
@@ -421,7 +420,6 @@ namespace FfmpegSharp
       {
         try
         {
-          //FfmpegProcess_.StandardInput.Write('q');
           FfmpegProcess_.Kill();
         }
 

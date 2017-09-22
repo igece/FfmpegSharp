@@ -19,8 +19,6 @@ namespace FfmpegSharp
 
     public TimeSpan? Duration { get; set; }
 
-    public TimeSpan? To { get; set; }
-
     public TimeSpan? Seek { get; set; }
 
     public TimeSpan? SeekFromEnd { get; set; }

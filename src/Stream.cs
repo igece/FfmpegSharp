@@ -18,22 +18,22 @@ namespace FfmpegSharp
         if (id_.HasValue)
         {
           if (this is IVideo)
-            IdStr = "v:" + Id.Value.ToString();
+            IdStr = ":v:" + Id.Value.ToString();
           else if (this is IAudio)
-            IdStr = "a:" + Id.Value.ToString();
+            IdStr = ":a:" + Id.Value.ToString();
           else if (this is ISubtitle)
-            IdStr = "s" + Id.Value.ToString();
+            IdStr = ":s:" + Id.Value.ToString();
           else
             throw new FfmpegException("Invalid stream type");
         }
         else
         {
           if (this is IVideo)
-            IdStr = "v";
+            IdStr = ":v";
           else if (this is IAudio)
-            IdStr = "a";
+            IdStr = ":a";
           else if (this is ISubtitle)
-            IdStr = "s";
+            IdStr = ":s";
           else
             throw new FfmpegException("Invalid stream type");
         }
@@ -50,13 +50,13 @@ namespace FfmpegSharp
     private byte? id_;
 
 
-    public Stream()
+    protected Stream()
     {
       Id = null;
     }
 
 
-    public Stream(byte id)
+    protected Stream(byte id)
     {
       Id = id;
     }
@@ -71,7 +71,7 @@ namespace FfmpegSharp
       List<string> args = new List<string>();
 
       if (!String.IsNullOrEmpty(Codec))
-        args.Add(String.Format("-codec:{0} {1}", IdStr, Codec));
+        args.Add(String.Format("-codec{0} {1}", IdStr, Codec));
 
       foreach (var customArg in CustomArgs)
       {

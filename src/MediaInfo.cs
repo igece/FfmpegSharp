@@ -12,7 +12,7 @@ namespace FfmpegSharp
     /// <summary>
     /// Media time length. 
     /// </summary>
-    public readonly TimeSpan? Duration;
+    public readonly TimeSpan Duration;
 
 
     /// <summary>
@@ -25,7 +25,7 @@ namespace FfmpegSharp
     /// <param name="size">Audio file size</param>
     /// <param name="bitRate"></param>
     /// <param name="format">Audio format.</param>
-    public MediaInfo(TimeSpan? duration)
+    public MediaInfo(TimeSpan duration)
     {
       Duration = duration;
     }
@@ -39,10 +39,7 @@ namespace FfmpegSharp
     {
       StringBuilder result = new StringBuilder();
 
-      if (Duration.HasValue)
-        result.AppendLine("Duration: " + Duration.Value.ToString(@"hh\:mm\:ss\.ff"));
-      else
-        result.AppendLine("Duration: N/A");
+      result.AppendLine("Duration: " + Duration.ToString(@"hh\:mm\:ss\.ff"));
 
       return result.ToString();
     }

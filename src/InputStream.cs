@@ -5,13 +5,13 @@ namespace FfmpegSharp
 {
   public abstract class InputStream : Stream, IInput
   {
-    public InputStream()
+    protected InputStream()
       : base()
     {
     }
 
 
-    public InputStream(byte id)
+    protected InputStream(byte id)
       : base(id)
     {
     }
