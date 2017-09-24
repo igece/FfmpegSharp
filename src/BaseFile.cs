@@ -11,16 +11,34 @@ namespace FfmpegSharp
   public abstract class BaseFile
   {
     /// <summary>
-    /// File URL.
+    /// Input/output file URL. 
     /// </summary>
     public string Url { get; set; }
 
+    /// <summary>
+    /// Force file format. The format is normally auto detected for input files and guessed from the file
+    /// extension for output files, so this option is not needed in most cases.
+    /// </summary>
     public string Format { get; set; }
 
+    /// <summary>
+    /// Input file: Limit the duration of data read from the input file.
+    /// Output file: Stop writing the output after its duration reaches this value.
+    /// </summary>
     public TimeSpan? Duration { get; set; }
 
+    /// <summary>
+    /// Input file: Seeks to specified position. Note that in most formats it is not possible to seek exactly,
+    /// so FFmpeg will seek to the closest seek point before position. When transcoding and -accurate_seek is
+    /// enabled (the default), this extra segment between the seek point and position will be decoded and discarded.
+    /// When doing stream copy or when -noaccurate_seek is used, it will be preserved.
+    /// Output file: Decodes but discards input until the timestamps reach position.
+    /// </summary>
     public TimeSpan? Seek { get; set; }
 
+    /// <summary>
+    /// 
+    /// </summary>
     public TimeSpan? SeekFromEnd { get; set; }
 
     /// <summary>

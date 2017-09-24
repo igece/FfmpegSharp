@@ -5,7 +5,6 @@ using System.Globalization;
 using System.IO;
 using System.Text.RegularExpressions;
 using FfmpegSharp.Exceptions;
-using System.Threading.Tasks;
 
 
 namespace FfmpegSharp
@@ -26,6 +25,10 @@ namespace FfmpegSharp
     /// <value>The executable path.</value>
     public string Path { get; set; }
 
+    /// <summary>
+    /// Overwrite existing output files. If this option is set to false and any specified output
+    /// file already exists, FFmpeg exeution ends.
+    /// </summary>
     public bool OverwriteOutput { get; set; }
 
     /// <summary>
@@ -131,6 +134,7 @@ namespace FfmpegSharp
     /// <summary>
     /// Spawns a new Ffmpeg process using the specified options in this instance and starts recording from the record audio the specified file.
     /// </summary>
+    /// <param name="inputDevice">Input </param>
     /// <param name="outputFile">Media file to be recorded.</param>
     public void Record(string inputDevice, string outputFile)
     {
