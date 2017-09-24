@@ -10,6 +10,7 @@ namespace FfmpegSharp
   /// </summary>
   public class OutputFile : BaseFile, IOutput
   {
+    public UInt64? Size { get; set; }
     public TargetType? Target { get; set; }
     public DateTime? Timestamp { get; set; }
     public TimeSpan? To { get; set; }
@@ -54,6 +55,9 @@ namespace FfmpegSharp
       if (!string.IsNullOrEmpty(baseStr))
         args.Add(baseStr);
 
+      if (Size.HasValue)
+        args.Add("-fs " + Size.Value);
+    
       if (Target.HasValue)
       {
         switch (Target.Value)
