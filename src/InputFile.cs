@@ -10,6 +10,7 @@ namespace FfmpegSharp
   /// </summary>
   public class InputFile : BaseFile, IInput
   {
+    public Int16? Loop { get; set; }
     public TimeSpan? Offset { get; set; }
 
     public InputVideoStream Video { get; private set; }
@@ -54,6 +55,9 @@ namespace FfmpegSharp
       args.Add(Video.ToString());
       args.Add(Audio.ToString());
       args.Add(Subtitles.ToString());
+
+      if (Loop.HasValue)
+        args.Add("-stream_loop " + Loop.Value);
 
       if (Offset.HasValue)
         args.Add("-itsoffset " + Offset.Value.TotalSeconds);
