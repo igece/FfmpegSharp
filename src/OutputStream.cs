@@ -9,7 +9,7 @@ namespace FfmpegSharp
   {
     public string Filter { get; set; }
 
-    public int? MaxFrames { get; set; }
+    public int? Frames { get; set; }
 
     public StreamDisposition? Disposition { get; set; }
 
@@ -70,8 +70,8 @@ namespace FfmpegSharp
       if (!string.IsNullOrEmpty(Filter))
         args.Add(string.Format("-filter{0} {1}", IdStr, Filter));
 
-      if (MaxFrames.HasValue)
-        args.Add(string.Format("-frames{0} {1}", IdStr, MaxFrames.Value));
+      if (Frames.HasValue)
+        args.Add(string.Format("-frames{0} {1}", IdStr, Frames.Value));
 
       if (Qscale.HasValue)
         args.Add(string.Format("-qscale{0} {1}", IdStr, Qscale.Value));
