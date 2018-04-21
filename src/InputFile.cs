@@ -65,7 +65,15 @@ namespace FfmpegSharp
       if (!string.IsNullOrEmpty(Url))
       {
         if (Url.Contains(" "))
-          args.Add("-i \"" + Url + "\"");
+        {
+          if ((Environment.OSVersion.Platform == PlatformID.Win32NT) ||
+              (Environment.OSVersion.Platform == PlatformID.Win32Windows) ||
+              (Environment.OSVersion.Platform == PlatformID.Win32S) ||
+              (Environment.OSVersion.Platform == PlatformID.WinCE))
+            args.Add("-i \"" + Url + "\"");
+          else
+            args.Add("-i '" + Url + "'");
+        }
         else
           args.Add("-i " + Url);
       }
