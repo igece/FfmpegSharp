@@ -34,7 +34,8 @@ namespace FfmpegSharp
     /// <summary>
     /// Custom global arguments.
     /// </summary>
-    public string CustomArgs { get; set; }
+    public readonly Dictionary<string, string> CustomArgs = new Dictionary<string, string>();
+
 
     /// <summary>
     /// Gets the full command line of the last call to Ffmpeg.
@@ -309,8 +310,13 @@ namespace FfmpegSharp
 
         // Global options.
 
-        if (!String.IsNullOrEmpty(CustomArgs))
-          args.Add(CustomArgs);
+        foreach (var customArg in CustomArgs)
+        {
+          if (string.IsNullOrEmpty(customArg.Value))
+            args.Add("-" + customArg.Key);
+          else
+            args.Add(string.Format("-{0} {1}", customArg.Key, customArg.Value));
+        }
 
         // Input options and files.
 
