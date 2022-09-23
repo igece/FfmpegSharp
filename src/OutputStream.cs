@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System;
-using System.Security.Policy;
 
 
 namespace FfmpegSharp

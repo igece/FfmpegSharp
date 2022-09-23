@@ -1,102 +1,43 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="packages\NuGet.Build.Packaging.0.2.0\build\NuGet.Build.Packaging.props" Condition="Exists('packages\NuGet.Build.Packaging.0.2.0\build\NuGet.Build.Packaging.props')" />
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
-  <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{900A3274-0A8A-4AF3-A34F-CCB27114E58F}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>FfmpegSharp</RootNamespace>
-    <AssemblyName>FfmpegSharp</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <NuGetPackageImportStamp>
-    </NuGetPackageImportStamp>
-    <PackageId>Ffmpeg.igecelabs</PackageId>
-    <PackageVersion>0.3</PackageVersion>
-    <Authors>igece.labs</Authors>
-    <PackageLicenseUrl>https://github.com/igece/FfmpegSharp/blob/master/LICENSE</PackageLicenseUrl>
-    <PackageProjectUrl>https://github.com/igece/FfmpegSharp</PackageProjectUrl>
-    <Summary>Library that serves as a wrapper to FFmpeg.</Summary>
-    <PackageTags>ffmpeg wrapper video audio conversion filters</PackageTags>
-    <Title>FFmpegSharp</Title>
-    <Description>Library that serves as a wrapper to Ffmpeg.</Description>
-    <ReleaseVersion>0.5.*</ReleaseVersion>
-    <PackOnBuild>true</PackOnBuild>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <IntermediateOutputPath>..\obj\Debug\</IntermediateOutputPath>
-    <OutputPath>..\bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <DocumentationFile>..\bin\Debug\FfmpegSharp.XML</DocumentationFile>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>
-    </DebugType>
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFrameworks>netstandard2.0</TargetFrameworks>
+		<LangVersion>latest</LangVersion>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<Version>0.3</Version>
+		<Authors>igece.labs</Authors>
+		<PackageLicenseExpression></PackageLicenseExpression>
+		<PackageProjectUrl>https://github.com/igece/FfmpegSharp</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/igece/FfmpegSharp</RepositoryUrl>
+		<Description>Wrapper for FFmpeg.</Description>
+		<PackageTags>ffmpeg wrapper video audio conversion</PackageTags>
+		<PackageReleaseNotes>Compiled for .NET Standard</PackageReleaseNotes>
+		<PackageLicenseFile>LICENSE</PackageLicenseFile>
+	</PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <Optimize>true</Optimize>
-    <IntermediateOutputPath>..\obj\Release\</IntermediateOutputPath>
-    <OutputPath>..\bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <DocumentationFile>..\bin\Release\FfmpegSharp.xml</DocumentationFile>
+    <OutputPath>..\bin\$(Configuration)</OutputPath>
   </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <OutputPath>..\bin\$(Configuration)</OutputPath>
+  </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
+    <Compile Remove="Test\**" />
+    <EmbeddedResource Remove="Test\**" />
+    <None Remove="Test\**" />
   </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Events.cs" />
-    <Compile Include="MediaInfo.cs" />
-    <Compile Include="BaseFile.cs" />
-    <Compile Include="InputFile.cs" />
-    <Compile Include="OutputFile.cs" />
-    <Compile Include="Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
-    <Compile Include="Ffmpeg.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="FormattedSize.cs" />
-    <Compile Include="FfmpegProcess.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Exceptions\FfmpegException.cs" />
-    <Compile Include="OutputVideoStream.cs" />
-    <Compile Include="Stream.cs" />
-    <Compile Include="OutputAudioStream.cs" />
-    <Compile Include="OutputSubtitleStream.cs" />
-    <Compile Include="InputStream.cs" />
-    <Compile Include="OutputStream.cs" />
-    <Compile Include="Exceptions\FfmpegFatalErrorException.cs" />
-    <Compile Include="InputVideoStream.cs" />
-    <Compile Include="InputAudioStream.cs" />
-    <Compile Include="InputSubtitleStream.cs" />
-    <Compile Include="MarkerInterfaces.cs" />
-    <Compile Include="Enums.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="packages\NuGet.Build.Packaging.0.2.0\build\NuGet.Build.Packaging.targets" Condition="Exists('packages\NuGet.Build.Packaging.0.2.0\build\NuGet.Build.Packaging.targets')" />
+  
+	<ItemGroup>
+	  <Folder Include="Properties\" />
+	</ItemGroup>
+  
+	<ItemGroup>
+	  <None Include="..\LICENSE">
+	    <Pack>True</Pack>
+	    <PackagePath></PackagePath>
+	  </None>
+	</ItemGroup>
 </Project>
