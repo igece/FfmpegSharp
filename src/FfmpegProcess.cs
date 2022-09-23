@@ -10,7 +10,7 @@ namespace FfmpegSharp
 {
     internal sealed class FfmpegProcess : Process
     {
-        public static readonly Regex ProgressRegex = new Regex(@"frame=\s*(\d+) fps=\s*(\d+[.\d]*) q=\s*(-?\d+[.\d]*) L?size=\s*(\d+)kB time=\s*(\d{2}:\d{2}:\d{2}\.?\d{0,2}) bitrate=\s*(\d+[.\d]*|N/A)\s*(?:kbits/s)?");
+        public static readonly Regex ProgressRegex = new Regex(@"frame=\s*(\d+) fps=\s*(\d+[.\d]*) q=\s*(-?\d+[.\d]*) L?size=\s*(\d+|N/A)(?:kB)? time=\s*(-?\d{2,}:\d{2}:\d{2}\.?\d{0,2}) bitrate=\s*(\d+[.\d]*|N/A)\s*(?:kbits/s)?");
         public static readonly Regex LogRegex = new Regex(@"\[(\w+)\]\s(.+)");
         public static readonly Regex DurationRegEx = new Regex(@"Duration: ([^,]*), ");
         public static readonly Regex VideoMetadataRegEx = new Regex(@"(Stream\s*#[0-9]*:[0-9]*\(?[^\)]*?\)?: Video:.*)");
@@ -18,6 +18,7 @@ namespace FfmpegSharp
 
 
         private FfmpegProcess()
+        : base()
         {
             StartInfo.ErrorDialog = false;
             StartInfo.CreateNoWindow = true;
