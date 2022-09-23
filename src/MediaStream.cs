@@ -5,8 +5,11 @@ using FfmpegSharp.Exceptions;
 
 namespace FfmpegSharp
 {
-  public abstract class Stream
+  public abstract class MediaStream
   {
+    public MediaStreamType Type { get; set; }
+
+
     public byte? Id
     {
       get { return id_; }
@@ -17,25 +20,44 @@ namespace FfmpegSharp
 
         if (id_.HasValue)
         {
-          if (this is IVideo)
-            IdStr = ":v:" + Id.Value.ToString();
-          else if (this is IAudio)
-            IdStr = ":a:" + Id.Value.ToString();
-          else if (this is ISubtitle)
-            IdStr = ":s:" + Id.Value.ToString();
-          else
-            throw new FfmpegException("Invalid stream type");
+          switch (Type)
+          {
+            case MediaStreamType.Audio:
+              IdStr = ":a:" + Id.Value.ToString();
+              break;
+
+              case MediaStreamType.Video:
+                IdStr = ":v:" + Id.Value.ToString();
+                break;
+
+              case MediaStreamType.Subtitle:
+                IdStr = ":s:" + Id.Value.ToString();
+                break;
+
+              default:
+                throw new FfmpegException("Invalid stream type");
+          }
         }
+
         else
         {
-          if (this is IVideo)
-            IdStr = ":v";
-          else if (this is IAudio)
-            IdStr = ":a";
-          else if (this is ISubtitle)
-            IdStr = ":s";
-          else
-            throw new FfmpegException("Invalid stream type");
+          switch (Type)
+          {
+            case MediaStreamType.Audio:
+              IdStr = ":a:";
+              break;
+
+            case MediaStreamType.Video:
+              IdStr = ":v:";
+              break;
+
+            case MediaStreamType.Subtitle:
+              IdStr = ":s:";
+              break;
+
+            default:
+              throw new FfmpegException("Invalid stream type");
+          }
         }
       }
     }
@@ -50,20 +72,20 @@ namespace FfmpegSharp
     private byte? id_;
 
 
-    protected Stream()
+    protected MediaStream()
     {
       Id = null;
     }
 
 
-    protected Stream(byte id)
+    protected MediaStream(byte id)
     {
       Id = id;
     }
 
 
     /// <summary>
-    /// Translate a <see cref="Stream"/> instance to a set of command arguments to be passed to Ffmpeg.
+    /// Translate a <see cref="MediaStream"/> instance to a set of command arguments to be passed to Ffmpeg.
     /// </summary>
     /// <returns>String containing Ffmpeg command arguments.</returns>
     public override string ToString()

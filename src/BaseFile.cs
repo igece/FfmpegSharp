@@ -48,7 +48,7 @@ namespace FfmpegSharp
 
 
 
-    protected readonly Dictionary<byte, Stream> streams_ = new Dictionary<byte, Stream>();
+    protected readonly Dictionary<byte, MediaStream> streams_ = new Dictionary<byte, MediaStream>();
 
 
     /// <summary>

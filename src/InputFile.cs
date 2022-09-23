@@ -8,7 +8,7 @@ namespace FfmpegSharp
   /// <summary>
   /// Input format options.
   /// </summary>
-  public class InputFile : BaseFile, IInput
+  public class InputFile : BaseFile
   {
     public Int16? Loop { get; set; }
     public TimeSpan? Offset { get; set; }
@@ -30,7 +30,7 @@ namespace FfmpegSharp
     }
 
 
-    public void SetStream(InputStream stream)
+    public void SetStream(InputMediaStream stream)
     {
       if (stream.Id.HasValue)
         streams_[stream.Id.Value] = stream;

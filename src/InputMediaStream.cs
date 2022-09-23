@@ -3,23 +3,23 @@
 
 namespace FfmpegSharp
 {
-  public abstract class InputStream : Stream, IInput
+  public abstract class InputMediaStream : MediaStream
   {
-    protected InputStream()
+    protected InputMediaStream()
       : base()
     {
     }
 
 
-    protected InputStream(byte id)
+    protected InputMediaStream(byte id)
       : base(id)
     {
     }
 
 
     /// <summary>
-    /// Translate a <see cref="InputStream"/> instance to a set of command arguments to be passed to Ffmpeg
-    /// (adds additional command arguments to <see cref="Stream.ToString()"/>).
+    /// Translate a <see cref="InputMediaStream"/> instance to a set of command arguments to be passed to Ffmpeg
+    /// (adds additional command arguments to <see cref="MediaStream.ToString()"/>).
     /// </summary>
     /// <returns>String containing Ffmpeg command arguments.</returns>
     public override string ToString()

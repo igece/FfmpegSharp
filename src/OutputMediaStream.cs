@@ -4,7 +4,7 @@ using System;
 
 namespace FfmpegSharp
 {
-  public abstract class OutputStream : Stream, IOutput
+  public abstract class OutputMediaStream : MediaStream
   {
     public string Filter { get; set; }
 
@@ -15,21 +15,21 @@ namespace FfmpegSharp
     public UInt16? Qscale { get; set; }
 
 
-    protected OutputStream()
+    protected OutputMediaStream()
       : base()
     {
     }
 
 
-    protected OutputStream(byte id)
+    protected OutputMediaStream(byte id)
       : base(id)
     {
     }
 
 
     /// <summary>
-    /// Translate a <see cref="OutputStream"/> instance to a set of command arguments to be passed to Ffmpeg
-    /// (adds additional command arguments to <see cref="Stream.ToString()"/>).
+    /// Translate a <see cref="OutputMediaStream"/> instance to a set of command arguments to be passed to Ffmpeg
+    /// (adds additional command arguments to <see cref="MediaStream.ToString()"/>).
     /// </summary>
     /// <returns>String containing Ffmpeg command arguments.</returns>
     public override string ToString()

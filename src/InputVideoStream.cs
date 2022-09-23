@@ -3,7 +3,7 @@
 
 namespace FfmpegSharp
 {
-  public class InputVideoStream : InputStream, IVideo
+  public class InputVideoStream : InputMediaStream
   {
     public InputVideoStream()
       : base()

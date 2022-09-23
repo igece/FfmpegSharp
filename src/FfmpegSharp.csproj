@@ -25,14 +25,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Properties\**" />
     <Compile Remove="Test\**" />
+    <EmbeddedResource Remove="Properties\**" />
     <EmbeddedResource Remove="Test\**" />
+    <None Remove="Properties\**" />
     <None Remove="Test\**" />
   </ItemGroup>
-  
-	<ItemGroup>
-	  <Folder Include="Properties\" />
-	</ItemGroup>
   
 	<ItemGroup>
 	  <None Include="..\LICENSE">

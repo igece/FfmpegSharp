@@ -8,7 +8,7 @@ namespace FfmpegSharp
   /// <summary>
   ///  Options to be applied to an output file.
   /// </summary>
-  public class OutputFile : BaseFile, IOutput
+  public class OutputFile : BaseFile
   {
     public UInt64? Size { get; set; }
     public TargetType? Target { get; set; }
@@ -33,7 +33,7 @@ namespace FfmpegSharp
     }
 
 
-    public void SetStream(OutputStream stream)
+    public void SetStream(OutputMediaStream stream)
     {
       if (stream.Id.HasValue)
         streams_[stream.Id.Value] = stream;
