@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
+using FfmpegSharp.Enums;
 using FfmpegSharp.Exceptions;
 
 

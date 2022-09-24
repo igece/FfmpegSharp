@@ -1,4 +1,4 @@
-﻿namespace FfmpegSharp
+﻿namespace FfmpegSharp.Enums
 {
     public enum MediaStreamType
     {
