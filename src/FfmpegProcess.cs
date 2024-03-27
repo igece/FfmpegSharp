@@ -9,7 +9,7 @@ namespace FfmpegSharp
 {
     internal sealed class FfmpegProcess : Process
     {
-        public static readonly Regex ProgressRegex = new(@"frame=\s*(\d+) fps=\s*(\d+[.\d]*) q=\s*(-?\d+[.\d]*) L?size=\s*(\d+|N/A)(?:kB|KiB)? time=\s*(-?\d{2,}:\d{2}:\d{2}\.?\d{0,2}|N/A) bitrate=\s*(\d+[.\d]*|N/A)\s*(?:kbits/s)?");
+        public static readonly Regex ProgressRegex = new(@"frame=\s*(\d+) fps=\s*(\d+[.\d]*) q=\s*(-?\d+[.\d]*) L?size=\s*(\d+|N/A)(?:kB|KiB)? time=\s*(-?\d{2,}:\d{2}:\d{2}\.?\d{0,2}|N/A) bitrate=\s*(-?\d+[.\d]*|N/A)\s*(?:kbits/s)?");
         public static readonly Regex LogRegex = new(@"\[(\w+)\]\s(.+)");
         public static readonly Regex DurationRegEx = new(@"Duration: ([^,]*), ");
         public static readonly Regex VideoMetadataRegEx = new(@"(Stream\s*#[0-9]*:[0-9]*\(?[^\)]*?\)?: Video:.*)");
